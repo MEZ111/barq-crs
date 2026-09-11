@@ -1,0 +1,10 @@
+[
+  {
+    "url": "https://lab.example.test/api/users/7",
+    "method": "GET",
+    "route": "/api/users/{id}",
+    "resource_id": "7",
+    "resource_tenant": "red",
+    "tags": ["controlled-object"]
+  }
+]

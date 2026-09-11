@@ -60,13 +60,16 @@ class ScopePolicy:
     def from_dict(cls, value: dict) -> "ScopePolicy":
         targets = []
         for item in value.get("targets", []):
+            max_rps = float(item.get("max_rps", 1.0))
+            if not 0 < max_rps <= 5:
+                raise ScopeViolation("max_rps must be greater than 0 and no more than 5")
             targets.append(
                 TargetRule(
                     pattern=str(item["pattern"]),
                     schemes=tuple(x.lower() for x in item.get("schemes", ["https"])),
                     ports=tuple(int(x) for x in item.get("ports", [443])),
                     methods=tuple(x.upper() for x in item.get("methods", ["GET", "HEAD", "OPTIONS"])),
-                    max_rps=float(item.get("max_rps", 1.0)),
+                    max_rps=max_rps,
                 )
             )
         if not targets:
@@ -108,7 +111,13 @@ class ScopePolicy:
         )
         return sha256(canonical.encode()).hexdigest()
 
-    def authorize(self, url: str, method: str = "GET", *, active: bool = False) -> str:
+    def authorized_rule(
+        self,
+        url: str,
+        method: str = "GET",
+        *,
+        active: bool = False,
+    ) -> tuple[str, TargetRule]:
         canonical = canonical_url(url)
         parsed = urlsplit(canonical)
         port = parsed.port or (443 if parsed.scheme == "https" else 80)
@@ -133,9 +142,13 @@ class ScopePolicy:
         if active and not self.active_testing:
             raise ScopeViolation("active testing is disabled by the program policy")
         if active and method in SAFE_METHODS:
-            return canonical
+            return canonical, matched
         if active and method not in SAFE_METHODS and self.human_approval_required:
             raise ScopeViolation("state-changing probe requires explicit human approval")
+        return canonical, matched
+
+    def authorize(self, url: str, method: str = "GET", *, active: bool = False) -> str:
+        canonical, _ = self.authorized_rule(url, method, active=active)
         return canonical
 
 

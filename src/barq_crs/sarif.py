@@ -53,7 +53,7 @@ def sarif_report(candidates: Iterable[Candidate]) -> dict:
             "tool": {
                 "driver": {
                     "name": "BARQ-CRS",
-                    "version": "0.1.0",
+                    "version": "0.2.0",
                     "informationUri": "https://github.com/MEZ111/barq-crs",
                     "rules": list(rules.values()),
                 }

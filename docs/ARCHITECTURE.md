@@ -18,8 +18,8 @@ deterministic score, safe next step, and remediation direction.
 
 ## Pipeline
 
-1. Ingest immutable, versioned inputs.
-2. Normalize routes, principals, objects, and security declarations.
+1. Ingest HAR/Burp traffic, bounded scoped reads, or immutable versioned inputs.
+2. Normalize routes, principals, tenants, objects, and security declarations.
 3. Run independent deterministic engines.
 4. Attach minimal evidence fingerprints.
 5. Deduplicate and reward corroboration across engines.

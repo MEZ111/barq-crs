@@ -37,3 +37,10 @@ def test_active_mode_is_explicit():
 def test_state_change_needs_human_approval():
     with pytest.raises(ScopeViolation, match="human approval"):
         policy(active=True).authorize("https://api.example.test/v1", "POST", active=True)
+
+
+def test_policy_caps_request_rate():
+    with pytest.raises(ScopeViolation, match="no more than 5"):
+        ScopePolicy.from_dict(
+            {"targets": [{"pattern": "lab.test", "max_rps": 100}]}
+        )

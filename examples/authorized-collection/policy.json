@@ -1,0 +1,15 @@
+{
+  "name": "replace-with-written-program-name",
+  "active_testing": true,
+  "human_approval_required": true,
+  "targets": [
+    {
+      "pattern": "lab.example.test",
+      "schemes": ["https"],
+      "ports": [443],
+      "methods": ["GET", "HEAD", "OPTIONS"],
+      "max_rps": 0.5
+    }
+  ],
+  "deny_paths": ["billing", "erase", "signout"]
+}

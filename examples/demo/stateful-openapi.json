@@ -1,0 +1,50 @@
+{
+  "openapi": "3.1.0",
+  "security": [{"bearerAuth": []}],
+  "components": {
+    "schemas": {
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": {"type": "integer"},
+          "email": {"type": "string"}
+        }
+      }
+    }
+  },
+  "paths": {
+    "/v1/users": {
+      "post": {
+        "operationId": "createUser",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {"email": {"type": "string"}}
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/User"}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/users/{userId}": {
+      "get": {
+        "operationId": "getUser",
+        "parameters": [
+          {"name": "userId", "in": "path", "required": true}
+        ],
+        "responses": {"200": {"description": "ok"}}
+      }
+    }
+  }
+}

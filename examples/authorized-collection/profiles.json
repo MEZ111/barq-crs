@@ -1,0 +1,18 @@
+[
+  {
+    "principal": "controlled-owner",
+    "role": "user",
+    "tenant": "red",
+    "owned_resource_ids": ["7"],
+    "header_env": {"Authorization": "BARQ_OWNER_AUTH"},
+    "static_headers": {"X-Research-ID": "approved-case-id"}
+  },
+  {
+    "principal": "controlled-reviewer",
+    "role": "user",
+    "tenant": "blue",
+    "owned_resource_ids": [],
+    "header_env": {"Authorization": "BARQ_REVIEWER_AUTH"},
+    "static_headers": {"X-Research-ID": "approved-case-id"}
+  }
+]

@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<items burpVersion="synthetic">
+  <item>
+    <time>2026-09-11T00:00:00Z</time>
+    <url>https://lab.example.test/api/users/7</url>
+    <method>GET</method>
+    <status>200</status>
+    <response base64="true">SFRUUC8xLjEgMjAwIE9LDQpDb250ZW50LVR5cGU6IGFwcGxpY2F0aW9uL2pzb24NCg0KeyJ1c2VyX2lkIjo3LCJlbWFpbCI6Im93bmVkQHRlc3QifQ==</response>
+  </item>
+</items>

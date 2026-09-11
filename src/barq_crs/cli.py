@@ -1,10 +1,13 @@
 from __future__ import annotations
 
 import argparse
+from dataclasses import asdict
 import json
 from pathlib import Path
 
 from .authz import AuthorizationDifferentialEngine
+from .api_graph import OpenApiDependencyGraph
+from .collector import EvidenceCollector, RequestSpec, SessionProfile
 from .ctf import ChallengeTriage, FlagOracle
 from .drift import ContractDriftEngine
 from .fusion import SignalFusion
@@ -13,6 +16,8 @@ from .models import Candidate, Evidence, Observation
 from .race import StateCollisionEngine, StateTransition
 from .report import markdown_report
 from .sarif import sarif_report
+from .scope import ScopePolicy
+from .traffic import BurpXmlIngestor, HarIngestor
 from .variant import PatchSeededVariantEngine
 
 
@@ -35,6 +40,11 @@ def _emit(value) -> None:
     print(json.dumps(value, indent=2, ensure_ascii=False))
 
 
+def _emit_jsonl(values) -> None:
+    for value in values:
+        print(json.dumps(value, separators=(",", ":"), ensure_ascii=False))
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="barq", description="Evidence-gated reasoning for authorized security research")
     commands = parser.add_subparsers(dest="command", required=True)
@@ -50,6 +60,32 @@ def build_parser() -> argparse.ArgumentParser:
     triage.add_argument("root")
     flag = commands.add_parser("flag-check", help="apply a local flag oracle to a text file")
     flag.add_argument("file")
+    collect = commands.add_parser(
+        "collect",
+        help="collect a bounded read-only identity matrix from an authorized scope",
+    )
+    collect.add_argument("policy")
+    collect.add_argument("requests")
+    collect.add_argument("profiles")
+    har = commands.add_parser("ingest-har", help="convert HAR traffic to BARQ JSONL")
+    har.add_argument("file")
+    har.add_argument("--principal", required=True)
+    har.add_argument("--role", default="user")
+    har.add_argument("--tenant")
+    burp = commands.add_parser(
+        "ingest-burp",
+        help="convert a Burp Suite XML history export to BARQ JSONL",
+    )
+    burp.add_argument("file")
+    burp.add_argument("--principal", required=True)
+    burp.add_argument("--role", default="user")
+    burp.add_argument("--tenant")
+    graph = commands.add_parser(
+        "api-sequences",
+        help="infer stateful producer/consumer sequences from OpenAPI",
+    )
+    graph.add_argument("spec")
+    graph.add_argument("--depth", type=int, default=3)
     rank = commands.add_parser("rank", help="rank a JSON list of BARQ candidates")
     rank.add_argument("candidates"); rank.add_argument("--report"); rank.add_argument("--campaign", default="authorized-research")
     sarif = commands.add_parser("sarif", help="convert BARQ candidates to SARIF 2.1.0")
@@ -77,6 +113,39 @@ def main(argv: list[str] | None = None) -> int:
         _emit([item.to_dict() for item in ChallengeTriage().analyze(args.root)])
     elif args.command == "flag-check":
         _emit(list(FlagOracle().find(Path(args.file).read_text(encoding="utf-8", errors="ignore"))))
+    elif args.command == "collect":
+        policy = ScopePolicy.load(args.policy)
+        requests = [RequestSpec.from_dict(value) for value in _json(args.requests)]
+        profiles = [SessionProfile.from_env_dict(value) for value in _json(args.profiles)]
+        observations = EvidenceCollector(policy).collect_matrix(requests, profiles)
+        _emit_jsonl(asdict(observation) for observation in observations)
+    elif args.command == "ingest-har":
+        observations = HarIngestor().load(
+            args.file,
+            principal=args.principal,
+            role=args.role,
+            tenant=args.tenant,
+        )
+        _emit_jsonl(asdict(observation) for observation in observations)
+    elif args.command == "ingest-burp":
+        observations = BurpXmlIngestor().load(
+            args.file,
+            principal=args.principal,
+            role=args.role,
+            tenant=args.tenant,
+        )
+        _emit_jsonl(asdict(observation) for observation in observations)
+    elif args.command == "api-sequences":
+        engine = OpenApiDependencyGraph()
+        document = _json(args.spec)
+        operations = engine.operations(document)
+        sequences = engine.sequences(document, max_depth=args.depth)
+        _emit(
+            {
+                "operations": [operation.to_dict() for operation in operations],
+                "sequences": [sequence.to_dict() for sequence in sequences],
+            }
+        )
     elif args.command == "rank":
         ranked = SignalFusion().rank(_candidate(x) for x in _json(args.candidates))
         if args.report:

@@ -10,15 +10,23 @@
 - Offline CTF challenge triage and flag oracle
 - Explicit scope and human-approval gates
 
-## 0.2 — validation lab
+## 0.2 — operational evidence pipeline (implemented)
+
+- Scope-gated read-only HTTP collection
+- Environment-bound controlled identity profiles
+- HAR and Burp Suite XML ingestion without stored headers
+- OpenAPI producer/consumer dependency graph and bounded sequences
+- Request, response-body, timeout, redirect, and rate limits
+- SARIF import/export bridge
+
+## 0.3 — validation lab
 
 - Docker-only vulnerable fixtures with seeded ground truth
 - Precision, recall, time-to-signal, and review-cost metrics
-- OpenAPI producer/consumer dependency graph
-- SARIF import/export and CodeQL correlation
+- CodeQL result correlation
 - Coverage-import adapter for Fuzz Introspector
 
-## 0.3 — private campaign runtime
+## 0.4 — private campaign runtime
 
 - Signed scope snapshots and expiry checks
 - Encrypted credential broker with per-adapter least privilege
