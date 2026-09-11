@@ -1,0 +1,8 @@
+diff --git a/records.py b/records.py
+--- a/records.py
++++ b/records.py
+@@ -1,2 +1,4 @@
+ def read_record(records, index):
++    if index < 0:
++        raise ValueError("negative index")
+     return records[index]

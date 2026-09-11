@@ -1,0 +1,15 @@
+{
+  "name": "owned-lab",
+  "active_testing": false,
+  "human_approval_required": true,
+  "targets": [
+    {
+      "pattern": "lab.example.test",
+      "schemes": ["https"],
+      "ports": [443],
+      "methods": ["GET", "HEAD", "OPTIONS"],
+      "max_rps": 0.5
+    }
+  ],
+  "deny_paths": ["billing", "erase"]
+}

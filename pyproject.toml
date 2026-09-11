@@ -1,0 +1,38 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "barq-crs"
+version = "0.1.0"
+description = "Evidence-gated cyber reasoning for authorized programs and isolated competitions"
+readme = "README.md"
+requires-python = ">=3.11"
+license = "MIT"
+authors = [{name = "MEZ111"}]
+dependencies = []
+keywords = ["security", "variant-analysis", "openapi", "authorization", "ctf", "sarif"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11",
+  "Topic :: Security",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0"]
+
+[project.scripts]
+barq = "barq_crs.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/MEZ111/barq-crs"
+Issues = "https://github.com/MEZ111/barq-crs/issues"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"

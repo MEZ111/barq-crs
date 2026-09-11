@@ -1,0 +1,2 @@
+Owned challenge fixture. Inspect the supplied HTTP service, JWT cookie, and
+GraphQL endpoint. The local flag format is flag{...}.

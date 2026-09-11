@@ -1,0 +1,16 @@
+[
+  {
+    "route": "POST /v1/coupons/redeem",
+    "resource_kind": "coupon",
+    "operation": "redeem",
+    "access": "write",
+    "invariant": "coupon.remaining_uses >= 0"
+  },
+  {
+    "route": "POST /v1/orders/apply-coupon",
+    "resource_kind": "coupon",
+    "operation": "apply",
+    "access": "write",
+    "invariant": "coupon.remaining_uses >= 0"
+  }
+]
