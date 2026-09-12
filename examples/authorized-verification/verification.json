@@ -1,0 +1,13 @@
+{
+  "name": "owned-lab-authorization-verification",
+  "policy": "policy.json",
+  "profiles": "profiles.json",
+  "resources": "resources.json",
+  "templates": "templates.json",
+  "include_anonymous": true,
+  "limits": {
+    "max_requests": 50,
+    "max_body_bytes": 500000,
+    "timeout_seconds": 8
+  }
+}
