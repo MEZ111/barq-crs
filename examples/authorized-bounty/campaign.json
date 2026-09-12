@@ -1,0 +1,16 @@
+{
+  "name": "example-authorized-bounty",
+  "domain": "example.test",
+  "policy": "policy.json",
+  "authorized_testing": true,
+  "max_leads": 100,
+  "recon": {
+    "update_templates": false,
+    "env": {
+      "HTTPX_RPS": "1",
+      "KATANA_RPS": "1",
+      "NUCLEI_RPS": "1",
+      "MAX_LIVE_HOSTS": "250"
+    }
+  }
+}
