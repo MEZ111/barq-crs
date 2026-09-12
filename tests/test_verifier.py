@@ -122,7 +122,7 @@ def test_openapi_planner_requires_explicit_resource_binding_and_skips_public():
     assert set(by_name) == {"getUser", "me"}
     assert by_name["getUser"].resource_kind == "user"
     assert by_name["getUser"].url.endswith("/users/{resource}")
-    assert any("teamUser" in item for item in plan.skipped)
+    assert any("GET /teams/{team}/users/{id}" in item for item in plan.skipped)
     assert any("GET /health: public by contract" in item for item in plan.skipped)
 
 
