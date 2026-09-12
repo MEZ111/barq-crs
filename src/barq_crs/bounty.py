@@ -207,10 +207,9 @@ class EndpointPrioritizer:
         if len(query) >= 3:
             score = min(100, score + 3)
             reasons.append("multi-parameter edge")
-        if parsed.scheme == "https":
-            canonical = urlunsplit(("https", parsed.netloc.lower(), parsed.path or "/", parsed.query, ""))
-        else:
-            canonical = urlunsplit(("http", parsed.netloc.lower(), parsed.path or "/", parsed.query, ""))
+        canonical = urlunsplit(
+            (parsed.scheme, parsed.netloc.lower(), parsed.path or "/", parsed.query, "")
+        )
         digest = sha256(f"{kind}|{route}".encode()).hexdigest()[:16]
         return BountyLead(
             id=f"lead-{digest}",
@@ -231,8 +230,6 @@ class EndpointPrioritizer:
                 continue
             parts.append("{id}" if self._ID_VALUE.fullmatch(part) else part.lower())
         path = "/" + "/".join(parts)
-        if path == "/":
-            path = "/"
         keys = sorted({key.lower() for key, _ in parse_qsl(parsed.query, keep_blank_values=True)})
         query = "&".join(f"{key}={{value}}" for key in keys)
         return f"{parsed.hostname.lower() if parsed.hostname else ''}{path}" + (f"?{query}" if query else "")
@@ -273,7 +270,7 @@ class BountyRunner:
         policy = ScopePolicy.load(policy_path)
         if not policy.active_testing:
             raise BountyError("policy.active_testing must be true for a live bounty campaign")
-        self._assert_domain_covered(policy, domain)
+        rate_ceiling = self._assert_domain_covered(policy, domain)
 
         output = Path(output_directory).resolve()
         output.mkdir(parents=True, exist_ok=True)
@@ -286,8 +283,11 @@ class BountyRunner:
             raise BountyError("recon config must be an object")
         if isinstance(recon_config, Mapping) and bool(recon_config.get("update_templates", False)):
             command.append("--update-templates")
-        env = self._bounded_env(recon_config if isinstance(recon_config, Mapping) else {})
-        self.command_runner(command, script.parent.parent, env)
+        env = self._bounded_env(
+            recon_config if isinstance(recon_config, Mapping) else {}, ceiling=rate_ceiling
+        )
+        cwd = script.parent.parent if script.parent.name == "scripts" else base
+        self.command_runner(command, cwd, env)
 
         recon_run = self._latest_run(recon_root, domain)
         urls = self._read_lines(recon_run / "crawl" / "logic_idor_candidates.txt")
@@ -363,7 +363,11 @@ class BountyRunner:
         domain = raw.strip().lower().removeprefix("*.").rstrip(".")
         if "://" in domain or "/" in domain or ":" in domain:
             raise BountyError("domain must be a bare DNS name, not a URL")
-        if not re.fullmatch(r"(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9-]{2,63}", domain):
+        labels = domain.split(".")
+        if len(labels) < 2 or any(
+            not re.fullmatch(r"[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?", label)
+            for label in labels
+        ):
             raise BountyError("invalid campaign domain")
         return domain
 
@@ -379,16 +383,23 @@ class BountyRunner:
         return candidate
 
     @staticmethod
-    def _assert_domain_covered(policy: ScopePolicy, domain: str) -> None:
-        covered = False
+    def _assert_domain_covered(policy: ScopePolicy, domain: str) -> float:
+        exact = []
+        wildcard = []
         for target in policy.targets:
             pattern = target.pattern.lower().rstrip(".")
-            if pattern == domain or pattern == f"*.{domain}":
-                if {"http", "https"} & set(target.schemes):
-                    covered = True
-                    break
-        if not covered:
-            raise BountyError("campaign domain is not explicitly covered by the supplied policy")
+            usable = "GET" in target.methods and bool({"http", "https"} & set(target.schemes))
+            if not usable:
+                continue
+            if pattern == domain:
+                exact.append(target)
+            elif pattern == f"*.{domain}":
+                wildcard.append(target)
+        if not exact or not wildcard:
+            raise BountyError(
+                "recon requires explicit policy rules for both the root domain and its wildcard subdomains"
+            )
+        return min(target.max_rps for target in (*exact, *wildcard))
 
     @staticmethod
     def _resolve_script(base: Path, raw: Any) -> Path:
@@ -406,7 +417,9 @@ class BountyRunner:
         raise BountyError("could not locate scripts/bb-pipeline.sh; set recon_script in the manifest")
 
     @staticmethod
-    def _bounded_env(config: Mapping[str, Any]) -> dict[str, str]:
+    def _bounded_env(config: Mapping[str, Any], *, ceiling: float = 5.0) -> dict[str, str]:
+        if not 0 < ceiling <= 5:
+            raise BountyError("policy rate ceiling must be greater than 0 and no more than 5")
         allowed = {
             "HTTPX_THREADS",
             "HTTPX_RPS",
@@ -427,7 +440,7 @@ class BountyRunner:
         }
         requested = config.get("env", {})
         if requested is None:
-            return {}
+            requested = {}
         if not isinstance(requested, Mapping):
             raise BountyError("recon.env must be an object")
         unknown = set(map(str, requested)) - allowed
@@ -435,8 +448,22 @@ class BountyRunner:
             raise BountyError(f"unsupported recon environment keys: {', '.join(sorted(unknown))}")
         result = {str(key): str(value) for key, value in requested.items()}
         for key in ("HTTPX_RPS", "KATANA_RPS", "NUCLEI_RPS"):
-            if key in result and float(result[key]) > 20:
-                raise BountyError(f"{key} cannot exceed 20 requests/second in bounty mode")
+            if key in result:
+                try:
+                    value = float(result[key])
+                except ValueError as exc:
+                    raise BountyError(f"{key} must be numeric") from exc
+                if not 0 < value <= ceiling:
+                    raise BountyError(f"{key} cannot exceed the policy ceiling of {ceiling:g} rps")
+            else:
+                result[key] = f"{ceiling:g}"
+        if "MAX_LIVE_HOSTS" in result:
+            try:
+                live_limit = int(result["MAX_LIVE_HOSTS"])
+            except ValueError as exc:
+                raise BountyError("MAX_LIVE_HOSTS must be an integer") from exc
+            if not 1 <= live_limit <= 10_000:
+                raise BountyError("MAX_LIVE_HOSTS must be between 1 and 10000")
         return result
 
     @staticmethod
@@ -451,7 +478,11 @@ class BountyRunner:
     def _read_lines(path: Path) -> list[str]:
         if not path.is_file():
             return []
-        return [line.strip() for line in path.read_text(encoding="utf-8", errors="ignore").splitlines() if line.strip()]
+        return [
+            line.strip()
+            for line in path.read_text(encoding="utf-8", errors="ignore").splitlines()
+            if line.strip()
+        ]
 
     @staticmethod
     def _nuclei_leads(path: Path) -> list[BountyLead]:
@@ -468,7 +499,9 @@ class BountyRunner:
             if not isinstance(item, Mapping):
                 continue
             info = item.get("info", {})
-            severity = str(info.get("severity", "unknown") if isinstance(info, Mapping) else "unknown").lower()
+            severity = str(
+                info.get("severity", "unknown") if isinstance(info, Mapping) else "unknown"
+            ).lower()
             template_id = str(item.get("template-id") or item.get("template_id") or "nuclei")
             url = str(item.get("matched-at") or item.get("matched_at") or item.get("host") or "")
             score = {"critical": 100, "high": 96, "medium": 78, "low": 55}.get(severity, 50)
@@ -501,10 +534,11 @@ class BountyRunner:
             score = 110 if confidence == "verified" else 100
             target = str(item.get("target", ""))
             candidate_id = str(item.get("id") or sha256(target.encode()).hexdigest()[:16])
+            kind = str(item.get("kind") or item.get("title") or "authorization")
             result.append(
                 BountyLead(
                     id=f"verify-{candidate_id}",
-                    kind=str(item.get("kind") or "authorization"),
+                    kind=kind,
                     url=target,
                     route=target,
                     score=score,
@@ -519,10 +553,9 @@ class BountyRunner:
     def _dedupe_leads(leads: Iterable[BountyLead]) -> list[BountyLead]:
         best: dict[str, BountyLead] = {}
         for lead in leads:
-            key = lead.id
-            previous = best.get(key)
+            previous = best.get(lead.id)
             if previous is None or lead.score > previous.score:
-                best[key] = lead
+                best[lead.id] = lead
         return sorted(best.values(), key=lambda item: (-item.score, item.kind, item.route))
 
     @staticmethod
