@@ -8,6 +8,7 @@ from typing import Any
 
 from .api_graph import OpenApiDependencyGraph
 from .authz import AuthorizationDifferentialEngine
+from .bounty import BountyRunner
 from .campaign import CampaignRunner
 from .collector import EvidenceCollector, RequestSpec, SessionProfile
 from .ctf import ChallengeTriage, FlagOracle
@@ -109,6 +110,16 @@ def build_parser() -> argparse.ArgumentParser:
     active_verify.add_argument("manifest")
     active_verify.add_argument("--output", default="barq-verification")
 
+    bounty = commands.add_parser(
+        "bounty",
+        help=(
+            "run scope-gated recon, deduplicate high-value leads, and optionally "
+            "merge controlled authorization verification into one bounty board"
+        ),
+    )
+    bounty.add_argument("manifest")
+    bounty.add_argument("--output", default="barq-bounty")
+
     har = commands.add_parser("ingest-har", help="convert HAR traffic to BARQ JSONL")
     har.add_argument("file")
     har.add_argument("--principal", required=True)
@@ -205,6 +216,8 @@ def main(argv: list[str] | None = None) -> int:
         _emit_jsonl(asdict(observation) for observation in observations)
     elif args.command == "verify":
         _emit(VerificationRunner().run(args.manifest, args.output).to_dict())
+    elif args.command == "bounty":
+        _emit(BountyRunner().run(args.manifest, args.output).to_dict())
     elif args.command == "ingest-har":
         observations = HarIngestor().load(
             args.file,
