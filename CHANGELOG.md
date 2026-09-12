@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.5.0] — 2026-09-12
+
+### Added
+
+- `barq bounty` one-command orchestration for authorized recon, triage, and optional controlled authorization verification
+- Route-level endpoint prioritization for object access, server-side fetch inputs, redirects/callbacks, file/path inputs, privileged routes, API introspection, file workflows, and identity flows
+- Nuclei signal ingestion into the same ranked bounty board
+- Optional merge of `barq verify` results so controlled `verified` authorization failures rank above scanner signals and recon leads
+- Stable lead IDs and `state.json` delta tracking to separate new results from previously seen leads
+- `bounty-board.json` and `bounty-report.md` artifacts plus an authorized example campaign and operating guide
+
+### Hardened
+
+- Bounty mode requires `authorized_testing=true`, `policy.active_testing=true`, and explicit policy rules for both the root domain and wildcard subdomains
+- Target-facing `httpx`, `katana`, and `nuclei` request rates are bound to the supplied policy's lowest `max_rps`
+- Bounty manifest inputs are directory-confined and recon environment overrides are allowlisted
+- Recon still excludes intrusive/bruteforce/DoS Nuclei templates and controlled verification remains read-only
+
 ## [0.4.0] — 2026-09-12
 
 ### Added
