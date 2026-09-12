@@ -1,27 +1,30 @@
-"""BARQ-CRS: evidence-gated security research orchestration."""
+"""BARQ-CRS: evidence-gated cyber reasoning for authorized research."""
 
-from .models import Candidate, Observation
-
-__all__ = ["Candidate", "Observation"]
-__version__ = "0.1.0"
-"""BARQ-CRS: evidence-gated security reasoning primitives."""
-
-from .authz import AuthorizationDifferentialEngine
 from .api_graph import OpenApiDependencyGraph
+from .authz import AuthorizationDifferentialEngine
+from .campaign import CampaignRunner
 from .collector import EvidenceCollector
 from .drift import ContractDriftEngine
 from .fusion import SignalFusion
+from .mobile import AndroidArtifactAnalyzer
+from .models import Candidate, Observation
 from .race import StateCollisionEngine
+from .schema_fuzz import OpenApiTestPlanner
 from .variant import PatchSeededVariantEngine
 
 __all__ = [
+    "AndroidArtifactAnalyzer",
     "AuthorizationDifferentialEngine",
-    "EvidenceCollector",
-    "OpenApiDependencyGraph",
+    "CampaignRunner",
+    "Candidate",
     "ContractDriftEngine",
+    "EvidenceCollector",
+    "Observation",
+    "OpenApiDependencyGraph",
+    "OpenApiTestPlanner",
     "PatchSeededVariantEngine",
     "SignalFusion",
     "StateCollisionEngine",
 ]
 
-__version__ = "0.2.0"
+__version__ = "0.3.0"

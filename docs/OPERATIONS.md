@@ -1,6 +1,6 @@
 # Authorized operations
 
-BARQ 0.2 closes the gap between captured traffic and analysis while keeping the
+BARQ 0.3 closes the gap between captured traffic and analysis while keeping the
 live boundary narrow and reviewable.
 
 ## Workflow A — existing browser or Burp traffic
@@ -51,6 +51,7 @@ The collector:
 
 ```bash
 barq api-sequences openapi.json --depth 3 > sequences.json
+barq api-plan openapi.json --max-cases 250 > test-plan.json
 ```
 
 BARQ resolves local schema references, normalizes names such as `userId` to
@@ -58,6 +59,20 @@ BARQ resolves local schema references, normalizes names such as `userId` to
 and emits bounded producer/consumer sequences. It does not execute mutating
 operations; the sequence graph is input for an isolated harness or manual
 review.
+
+## Workflow D — APK and full campaign
+
+```bash
+barq mobile application.apk > mobile-findings.json
+barq hunt campaign.json --output barq-output
+```
+
+APK inspection is static and bounded. The package is never extracted or
+executed, and embedded credential values are represented only by fingerprints.
+`barq hunt` can combine this result class with saved observations, OpenAPI
+contracts, source patches, and transition models. It can also invoke Workflow B
+when a campaign explicitly contains a `collection` block. See
+`docs/MOBILE.md` and `docs/CAMPAIGNS.md`.
 
 ## Evidence discipline
 

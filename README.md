@@ -15,13 +15,14 @@ into a ranked queue of reproducible security hypotheses.**
 </div>
 
 BARQ-CRS is an operational research core for authorized bug-bounty programs,
-defensive review, and isolated CTFs. It imports browser and Burp traffic or
-performs a bounded read-only collection across controlled identities. It then
-correlates authorization differentials, API contract drift, patch variants,
-dependency sequences, and state-machine collisions—without retaining session
-headers in evidence.
+defensive review, and isolated CTFs. It analyzes APKs without extracting them,
+derives high-value API tests from OpenAPI, imports browser and Burp traffic, or
+performs a bounded read-only collection across controlled identities. One
+campaign correlates mobile attack surface, authorization differentials, API
+contract drift, patch variants, dependency sequences, and state-machine
+collisions—without retaining session headers or raw credential values.
 
-> Current status: v0.2 research system. It finds **candidates**, not guaranteed
+> Current status: v0.3 research system. It finds **candidates**, not guaranteed
 > vulnerabilities. Any state-changing verification remains a human-approved
 > step governed by the target program's written rules.
 
@@ -29,6 +30,8 @@ headers in evidence.
 
 | Engine | Input | Signal produced | False-positive control |
 |---|---|---|---|
+| Android artifact analysis | APK/ZIP or decoded tree | Exported components, deep links, TLS/WebView/storage/release risks, secret fingerprints | Built-in binary AXML decoder, correlated code patterns, no APK extraction, archive budgets |
+| OpenAPI test planner | OpenAPI 2/3 schema | BOLA, mass assignment, HPP, type/canonicalization/boundary, replay plans | Deterministic budget, controlled identities, explicit oracles, mutating cases marked isolated-only |
 | Scoped collector | Explicit policy + controlled sessions | Live read-only identity matrix | Exact allowlist, no redirects, RPS/body/request budgets |
 | Traffic ingestion | HAR or Burp XML | Header-free labeled observations | Ownership and tenant annotations; secrets discarded |
 | Authorization differential | Responses from controlled identities | BOLA, role parity, cross-tenant access | Requires matching route/resource and sensitive schema overlap |
@@ -39,12 +42,13 @@ headers in evidence.
 | Signal fusion | Candidates from every engine | Deterministic priority queue | Rewards independent corroboration, not volume |
 | Evidence ledger | Sanitized events | Tamper-evident chain | Hash links plus recursive secret redaction |
 | SARIF bridge | Ranked candidates | GitHub Code Scanning-compatible output | Emits fingerprints and source locations without raw response data |
+| Campaign orchestrator | Versioned campaign manifest | Report, candidates, test plan, SARIF, summary, evidence ledger | Directory-confined inputs and one reproducible command |
 
 ## Architecture
 
 ```mermaid
 flowchart TD
-    A["HAR, Burp, scoped reads"] --> B["Identity and API models"]
+    A["APK, HAR, Burp, scoped reads"] --> B["Identity and API models"]
     C["Specs, patches, state"] --> B
     B --> D["Evidence fusion"]
     D --> E["Human review gate"]
@@ -76,6 +80,9 @@ Windows PowerShell activation:
 
 ```bash
 python scripts/benchmark.py
+barq mobile examples/demo/mobile-app
+barq api-plan examples/demo/stateful-openapi.json
+barq hunt examples/demo/hunt-campaign.json --output barq-output
 barq ingest-har examples/demo/traffic-owner.har --principal owner --role user
 barq ingest-burp examples/demo/burp-owner.xml --principal owner --role user
 barq api-sequences examples/demo/stateful-openapi.json --depth 3
@@ -96,7 +103,7 @@ Expected benchmark output:
 
 ```json
 {
-  "fixture": "barq-ground-truth-v1",
+  "fixture": "barq-ground-truth-v2",
   "counts": {
     "authorization": 3,
     "contract_drift": 2,
@@ -104,11 +111,25 @@ Expected benchmark output:
     "state_collisions": 1,
     "har_observations": 1,
     "burp_observations": 1,
-    "api_sequences": 1
+    "api_sequences": 1,
+    "schema_test_cases": 7,
+    "mobile_candidates": 11,
+    "campaign_candidates": 18,
+    "campaign_artifacts": 6,
+    "ledger_valid": true
   },
   "passed": true
 }
 ```
+
+## One-command campaign
+
+`barq hunt` accepts a versioned JSON manifest and can combine saved
+observations, an explicitly scoped live read-only matrix, OpenAPI versions,
+security patches and source, transition models, and an APK/decoded app. It
+emits six review artifacts: Markdown, JSON candidates, a schema test plan,
+SARIF 2.1.0, a summary, and a verified hash-chained ledger. See
+[campaign operations](docs/CAMPAIGNS.md) and [mobile analysis](docs/MOBILE.md).
 
 ## Scope policy
 
@@ -153,7 +174,7 @@ python scripts/benchmark.py
 ```
 
 CI runs the suite on Python 3.11, 3.12, and 3.13 with read-only repository
-permissions. The v0.2 suite contains **57 deterministic tests**.
+permissions. The v0.3 suite contains **101 deterministic tests**.
 
 ## Research basis
 

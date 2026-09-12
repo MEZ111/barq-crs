@@ -7,15 +7,18 @@ from pathlib import Path
 
 from .authz import AuthorizationDifferentialEngine
 from .api_graph import OpenApiDependencyGraph
+from .campaign import CampaignRunner
 from .collector import EvidenceCollector, RequestSpec, SessionProfile
 from .ctf import ChallengeTriage, FlagOracle
 from .drift import ContractDriftEngine
 from .fusion import SignalFusion
 from .ledger import EvidenceLedger
+from .mobile import AndroidArtifactAnalyzer
 from .models import Candidate, Evidence, Observation
 from .race import StateCollisionEngine, StateTransition
 from .report import markdown_report
 from .sarif import sarif_report
+from .schema_fuzz import OpenApiTestPlanner
 from .scope import ScopePolicy
 from .traffic import BurpXmlIngestor, HarIngestor
 from .variant import PatchSeededVariantEngine
@@ -86,6 +89,23 @@ def build_parser() -> argparse.ArgumentParser:
     )
     graph.add_argument("spec")
     graph.add_argument("--depth", type=int, default=3)
+    api_plan = commands.add_parser(
+        "api-plan",
+        help="generate bounded authorization, state, and schema test cases from OpenAPI",
+    )
+    api_plan.add_argument("spec")
+    api_plan.add_argument("--max-cases", type=int, default=250)
+    mobile = commands.add_parser(
+        "mobile",
+        help="statically analyze an APK/ZIP or decoded Android directory",
+    )
+    mobile.add_argument("artifact")
+    hunt = commands.add_parser(
+        "hunt",
+        help="run a complete local campaign and emit report, SARIF, plans, and ledger",
+    )
+    hunt.add_argument("campaign")
+    hunt.add_argument("--output", default="barq-output")
     rank = commands.add_parser("rank", help="rank a JSON list of BARQ candidates")
     rank.add_argument("candidates"); rank.add_argument("--report"); rank.add_argument("--campaign", default="authorized-research")
     sarif = commands.add_parser("sarif", help="convert BARQ candidates to SARIF 2.1.0")
@@ -146,6 +166,13 @@ def main(argv: list[str] | None = None) -> int:
                 "sequences": [sequence.to_dict() for sequence in sequences],
             }
         )
+    elif args.command == "api-plan":
+        cases = OpenApiTestPlanner().plan(_json(args.spec), max_cases=args.max_cases)
+        _emit([case.to_dict() for case in cases])
+    elif args.command == "mobile":
+        _emit(AndroidArtifactAnalyzer().analyze(args.artifact).to_dict())
+    elif args.command == "hunt":
+        _emit(CampaignRunner().run(args.campaign, args.output).to_dict())
     elif args.command == "rank":
         ranked = SignalFusion().rank(_candidate(x) for x in _json(args.candidates))
         if args.report:

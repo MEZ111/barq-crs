@@ -6,7 +6,9 @@ from typing import Iterable
 from .models import Candidate
 
 
-_SOURCE_TARGET = re.compile(r"^(?P<path>.+\.py):(?P<line>\d+)::")
+_SOURCE_TARGET = re.compile(
+    r"^(?P<path>.+\.(?:py|java|kt|smali|xml|js|json|properties)):(?P<line>\d+)::"
+)
 _LEVEL = {"critical": "error", "high": "error", "medium": "warning", "low": "note", "info": "note"}
 
 
@@ -53,7 +55,7 @@ def sarif_report(candidates: Iterable[Candidate]) -> dict:
             "tool": {
                 "driver": {
                     "name": "BARQ-CRS",
-                    "version": "0.2.0",
+                    "version": "0.3.0",
                     "informationUri": "https://github.com/MEZ111/barq-crs",
                     "rules": list(rules.values()),
                 }

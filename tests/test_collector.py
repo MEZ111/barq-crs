@@ -169,3 +169,19 @@ def test_profile_rejects_header_line_break():
             {"principal": "x", "header_env": {"Authorization": "BARQ_AUTH"}},
             {"BARQ_AUTH": "Bearer ok\r\nX-Injected: yes"},
         )
+
+
+@pytest.mark.parametrize(
+    "values",
+    [
+        {"max_requests": 0},
+        {"max_requests": 501},
+        {"max_body_bytes": 0},
+        {"max_body_bytes": 5_000_001},
+        {"timeout_seconds": 0},
+        {"timeout_seconds": 31},
+    ],
+)
+def test_collector_limits_have_hard_ceiling(values):
+    with pytest.raises(ValueError, match="must be between"):
+        CollectorLimits(**values)

@@ -1,0 +1,17 @@
+{
+  "name": "barq-synthetic-ground-truth",
+  "inputs": {
+    "observations": "observations.jsonl",
+    "openapi": "stateful-openapi.json",
+    "openapi_before": "openapi-before.json",
+    "openapi_after": "openapi-after.json",
+    "security_patch": "security-fix.diff",
+    "source_root": "source",
+    "transitions": "transitions.json",
+    "mobile": "mobile-app"
+  },
+  "limits": {
+    "api_sequence_depth": 3,
+    "max_schema_cases": 100
+  }
+}

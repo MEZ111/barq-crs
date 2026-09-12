@@ -6,10 +6,20 @@ from typing import Iterable
 from .fusion import RankedCandidate
 
 
+def _inline(value: object) -> str:
+    return (
+        str(value)
+        .replace("\r", " ")
+        .replace("\n", " ")
+        .replace("|", "\\|")
+        .replace("`", "'")
+    )
+
+
 def markdown_report(items: Iterable[RankedCandidate], campaign: str) -> str:
     ranked = list(items)
     lines = [
-        f"# BARQ-CRS Evidence Report — {campaign}",
+        f"# BARQ-CRS Evidence Report — {_inline(campaign)}",
         "",
         f"Generated: {datetime.now(timezone.utc).isoformat(timespec='seconds')}",
         "",
@@ -22,22 +32,26 @@ def markdown_report(items: Iterable[RankedCandidate], campaign: str) -> str:
     ]
     for item in ranked:
         finding = item.candidate
-        lines.append(f"| {item.priority_score:.2f} | {finding.severity} | {finding.engine} | `{finding.id}` | `{finding.target}` |")
+        lines.append(
+            f"| {item.priority_score:.2f} | {_inline(finding.severity)} | "
+            f"{_inline(finding.engine)} | `{_inline(finding.id)}` | "
+            f"`{_inline(finding.target)}` |"
+        )
     for index, item in enumerate(ranked, 1):
         finding = item.candidate
         lines.extend([
-            "", f"## {index}. {finding.title}", "",
-            f"- ID: `{finding.id}`",
-            f"- Target: `{finding.target}`",
+            "", f"## {index}. {_inline(finding.title)}", "",
+            f"- ID: `{_inline(finding.id)}`",
+            f"- Target: `{_inline(finding.target)}`",
             f"- Priority: **{item.priority_score:.2f}/10**",
-            f"- Corroboration: {', '.join(item.corroborating_engines)}",
-            f"- Safe next step: {finding.safe_next_step}",
-            f"- Remediation direction: {finding.remediation_hint}",
+            f"- Corroboration: {_inline(', '.join(item.corroborating_engines))}",
+            f"- Safe next step: {_inline(finding.safe_next_step)}",
+            f"- Remediation direction: {_inline(finding.remediation_hint)}",
             "", "Evidence:", "",
         ])
         for evidence in finding.evidence:
             lines.append(
-                f"- `{evidence.kind}` — {evidence.summary} "
+                f"- `{_inline(evidence.kind)}` — {_inline(evidence.summary)} "
                 f"(`{evidence.fingerprint[:16]}`)"
             )
     lines.extend(

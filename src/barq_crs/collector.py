@@ -116,6 +116,14 @@ class CollectorLimits:
     max_body_bytes: int = 1_000_000
     timeout_seconds: float = 10.0
 
+    def __post_init__(self) -> None:
+        if not 1 <= self.max_requests <= 500:
+            raise ValueError("max_requests must be between 1 and 500")
+        if not 1 <= self.max_body_bytes <= 5_000_000:
+            raise ValueError("max_body_bytes must be between 1 and 5000000")
+        if not 0.1 <= self.timeout_seconds <= 30:
+            raise ValueError("timeout_seconds must be between 0.1 and 30")
+
 
 class EvidenceCollector:
     """Bounded GET/HEAD/OPTIONS collector for an explicitly authorized scope."""
@@ -172,7 +180,7 @@ class EvidenceCollector:
         self._rate_limit(rule.pattern, rule.max_rps)
         headers = {
             "Accept": "application/json, text/plain;q=0.8, */*;q=0.1",
-            "User-Agent": "BARQ-CRS/0.2 authorized-security-research",
+            "User-Agent": "BARQ-CRS/0.3 authorized-security-research",
             **dict(profile.headers),
         }
         request = urllib.request.Request(canonical, headers=headers, method=method)

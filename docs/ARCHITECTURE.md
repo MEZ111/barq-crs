@@ -12,19 +12,19 @@ deterministic score, safe next step, and remediation direction.
 |---|---|---|
 | Scope | Exact host, wildcard subdomain, or CIDR in a signed-off policy | Implicit internet-wide target expansion |
 | Identity | Researcher-controlled principals and tenants | Third-party accounts or harvested sessions |
-| Actions | Offline analysis and reviewable plans | Unattended state-changing execution |
+| Actions | Offline analysis, bounded read-only collection, and reviewable plans | Unattended state-changing execution |
 | Evidence | Fingerprints, schemas, status, controlled labels | Cookies, tokens, raw personal data in reports |
 | CTF | Local challenge files and explicit flag oracle | Reuse against unrelated live systems |
 
 ## Pipeline
 
-1. Ingest HAR/Burp traffic, bounded scoped reads, or immutable versioned inputs.
+1. Ingest APKs, HAR/Burp traffic, bounded scoped reads, or immutable versioned inputs.
 2. Normalize routes, principals, tenants, objects, and security declarations.
 3. Run independent deterministic engines.
 4. Attach minimal evidence fingerprints.
 5. Deduplicate and reward corroboration across engines.
 6. Generate a human-reviewable plan only if evidence and scope gates pass.
-7. Record decisions in a hash-chained, redacted ledger.
+7. Emit Markdown, JSON, SARIF, and test plans; record decisions in a hash-chained, redacted ledger.
 
 ## Public/private split
 
@@ -58,3 +58,11 @@ New engines should:
 - never store a raw credential in evidence metadata;
 - include a safe next step and remediation hint;
 - ship with a positive fixture, negative fixture, and regression test.
+
+## Campaign boundary
+
+`CampaignRunner` is the composition root. Every referenced input must resolve
+inside the directory containing its manifest. Live collection is possible only
+through the existing scope policy and read-only collector. Mobile archives are
+never extracted. State-changing OpenAPI cases are serialized as plans and
+cannot cross the public runtime's execution boundary.

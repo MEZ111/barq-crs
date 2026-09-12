@@ -4,14 +4,14 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "barq-crs"
-version = "0.2.0"
+version = "0.3.0"
 description = "Evidence-gated cyber reasoning for authorized programs and isolated competitions"
 readme = "README.md"
 requires-python = ">=3.11"
 license = "MIT"
 authors = [{name = "MEZ111"}]
 dependencies = []
-keywords = ["security", "variant-analysis", "openapi", "authorization", "ctf", "sarif"]
+keywords = ["security", "android", "variant-analysis", "openapi", "authorization", "ctf", "sarif"]
 classifiers = [
   "Development Status :: 3 - Alpha",
   "License :: OSI Approved :: MIT License",
