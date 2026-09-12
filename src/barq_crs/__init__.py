@@ -11,6 +11,7 @@ from .mobile import AndroidArtifactAnalyzer
 from .models import Candidate, Observation
 from .race import StateCollisionEngine
 from .schema_fuzz import OpenApiTestPlanner
+from .smart_verify import DiscoveryTemplateSynthesizer, SmartBountyRunner
 from .variant import PatchSeededVariantEngine
 from .verifier import (
     ActiveAuthorizationVerifier,
@@ -26,6 +27,7 @@ __all__ = [
     "CampaignRunner",
     "Candidate",
     "ContractDriftEngine",
+    "DiscoveryTemplateSynthesizer",
     "EndpointPrioritizer",
     "EvidenceCollector",
     "Observation",
@@ -34,8 +36,9 @@ __all__ = [
     "OpenApiTestPlanner",
     "PatchSeededVariantEngine",
     "SignalFusion",
+    "SmartBountyRunner",
     "StateCollisionEngine",
     "VerificationRunner",
 ]
 
-__version__ = "0.5.0"
+__version__ = "0.6.0"
