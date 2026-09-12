@@ -12,5 +12,13 @@
       "NUCLEI_RPS": "1",
       "MAX_LIVE_HOSTS": "250"
     }
+  },
+  "smart_verification": {
+    "enabled": true,
+    "manifest": "smart-verification.json",
+    "max_templates": 50,
+    "parameter_bindings": {
+      "user_id": "user"
+    }
   }
 }
