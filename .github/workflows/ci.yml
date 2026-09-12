@@ -8,16 +8,43 @@ permissions:
   contents: read
 
 jobs:
-  test:
+  verify:
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         python-version: ["3.11", "3.12", "3.13"]
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
         with:
           python-version: ${{ matrix.python-version }}
-      - run: python -m pip install -e . pytest
-      - run: python -m pytest
-      - run: python scripts/benchmark.py
+          cache: pip
+      - run: python -m pip install --upgrade pip
+      - run: python -m pip install ".[dev]"
+      - name: Lint
+        run: ruff check src tests scripts
+      - name: Type-check critical engines
+        run: mypy src/barq_crs/authz.py src/barq_crs/drift.py src/barq_crs/verifier.py src/barq_crs/cli.py
+      - name: Tests with branch coverage
+        run: coverage run --branch -m pytest
+      - name: Coverage gate
+        run: coverage report --fail-under=85
+      - name: Ground-truth benchmark
+        run: python scripts/benchmark.py
+      - name: Build package
+        run: python -m build
+      - name: CLI smoke tests
+        run: |
+          barq --help >/dev/null
+          barq api-plan examples/demo/stateful-openapi.json --max-cases 20 >/dev/null
+          barq drift examples/demo/openapi-before.json examples/demo/openapi-after.json >/dev/null
+          python - <<'PY'
+          from barq_crs.cli import build_parser
+          parser = build_parser()
+          args = parser.parse_args(["verify", "manifest.json"])
+          assert args.command == "verify"
+          PY
+      - name: Dependency audit
+        if: matrix.python-version == '3.12'
+        run: pip-audit
