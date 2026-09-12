@@ -1,0 +1,22 @@
+{
+  "name": "example-authorized-bounty",
+  "active_testing": true,
+  "human_approval_required": true,
+  "deny_paths": ["billing", "checkout"],
+  "targets": [
+    {
+      "pattern": "example.test",
+      "schemes": ["https"],
+      "ports": [443],
+      "methods": ["GET", "HEAD", "OPTIONS"],
+      "max_rps": 1
+    },
+    {
+      "pattern": "*.example.test",
+      "schemes": ["https"],
+      "ports": [443],
+      "methods": ["GET", "HEAD", "OPTIONS"],
+      "max_rps": 1
+    }
+  ]
+}
