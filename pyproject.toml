@@ -14,7 +14,6 @@ dependencies = []
 keywords = ["security", "android", "variant-analysis", "openapi", "authorization", "ctf", "sarif"]
 classifiers = [
   "Development Status :: 3 - Alpha",
-  "License :: OSI Approved :: MIT License",
   "Programming Language :: Python :: 3",
   "Programming Language :: Python :: 3.11",
   "Topic :: Security",
