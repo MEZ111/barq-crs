@@ -1,0 +1,18 @@
+[
+  {
+    "principal": "alice",
+    "role": "user",
+    "tenant": "red",
+    "headers": {
+      "Authorization": {"env": "BARQ_ALICE_AUTH"}
+    }
+  },
+  {
+    "principal": "bob",
+    "role": "user",
+    "tenant": "blue",
+    "headers": {
+      "Authorization": {"env": "BARQ_BOB_AUTH"}
+    }
+  }
+]
