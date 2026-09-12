@@ -4,23 +4,42 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "barq-crs"
-version = "0.3.0"
-description = "Evidence-gated cyber reasoning for authorized programs and isolated competitions"
+version = "0.4.0"
+description = "Evidence-gated authorized security verification and cyber reasoning"
 readme = "README.md"
 requires-python = ">=3.11"
 license = "MIT"
 authors = [{name = "MEZ111"}]
 dependencies = []
-keywords = ["security", "android", "variant-analysis", "openapi", "authorization", "ctf", "sarif"]
+keywords = [
+  "security",
+  "authorization",
+  "bola",
+  "idor",
+  "android",
+  "variant-analysis",
+  "openapi",
+  "ctf",
+  "sarif",
+]
 classifiers = [
   "Development Status :: 3 - Alpha",
   "Programming Language :: Python :: 3",
   "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
   "Topic :: Security",
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=8.0"]
+dev = [
+  "build>=1.2",
+  "coverage>=7.6",
+  "mypy>=1.11",
+  "pip-audit>=2.7",
+  "pytest>=8.0",
+  "ruff>=0.6",
+]
 
 [project.scripts]
 barq = "barq_crs.cli:main"
@@ -35,3 +54,19 @@ where = ["src"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-q"
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["barq_crs"]
+
+[tool.mypy]
+python_version = "3.11"
+check_untyped_defs = true
+warn_unused_ignores = true
+no_implicit_optional = true
+ignore_missing_imports = true
