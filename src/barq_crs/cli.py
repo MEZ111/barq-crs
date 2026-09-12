@@ -8,7 +8,6 @@ from typing import Any
 
 from .api_graph import OpenApiDependencyGraph
 from .authz import AuthorizationDifferentialEngine
-from .bounty import BountyRunner
 from .campaign import CampaignRunner
 from .collector import EvidenceCollector, RequestSpec, SessionProfile
 from .ctf import ChallengeTriage, FlagOracle
@@ -22,6 +21,7 @@ from .report import markdown_report
 from .sarif import sarif_report
 from .schema_fuzz import OpenApiTestPlanner
 from .scope import ScopePolicy
+from .smart_verify import SmartBountyRunner
 from .traffic import BurpXmlIngestor, HarIngestor
 from .variant import PatchSeededVariantEngine
 from .verifier import VerificationRunner
@@ -113,8 +113,8 @@ def build_parser() -> argparse.ArgumentParser:
     bounty = commands.add_parser(
         "bounty",
         help=(
-            "run scope-gated recon, deduplicate high-value leads, and optionally "
-            "merge controlled authorization verification into one bounty board"
+            "run scope-gated recon, rank high-value leads, and automatically synthesize "
+            "budget-aware controlled authorization checks when smart_verification is enabled"
         ),
     )
     bounty.add_argument("manifest")
@@ -217,7 +217,7 @@ def main(argv: list[str] | None = None) -> int:
     elif args.command == "verify":
         _emit(VerificationRunner().run(args.manifest, args.output).to_dict())
     elif args.command == "bounty":
-        _emit(BountyRunner().run(args.manifest, args.output).to_dict())
+        _emit(SmartBountyRunner().run(args.manifest, args.output).to_dict())
     elif args.command == "ingest-har":
         observations = HarIngestor().load(
             args.file,
