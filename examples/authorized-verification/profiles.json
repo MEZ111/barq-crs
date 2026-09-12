@@ -1,0 +1,16 @@
+[
+  {
+    "principal": "alice",
+    "role": "user",
+    "tenant": "red",
+    "header_env": {"Authorization": "BARQ_ALICE_AUTH"},
+    "static_headers": {"X-Research-ID": "barq-authorized-verification"}
+  },
+  {
+    "principal": "bob",
+    "role": "user",
+    "tenant": "blue",
+    "header_env": {"Authorization": "BARQ_BOB_AUTH"},
+    "static_headers": {"X-Research-ID": "barq-authorized-verification"}
+  }
+]

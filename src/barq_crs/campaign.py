@@ -266,6 +266,7 @@ class CampaignRunner:
     def _top_candidate(item: RankedCandidate) -> dict[str, Any]:
         return {
             "id": item.candidate.id,
+            "kind": item.candidate.kind,
             "title": item.candidate.title,
             "target": item.candidate.target,
             "severity": item.candidate.severity,

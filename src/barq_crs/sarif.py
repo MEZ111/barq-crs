@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import re
-from typing import Iterable
+from typing import Any, Iterable
 
 from .models import Candidate
 
@@ -15,7 +15,7 @@ _LEVEL = {"critical": "error", "high": "error", "medium": "warning", "low": "not
 def sarif_report(candidates: Iterable[Candidate]) -> dict:
     findings = list(candidates)
     rules: dict[str, dict] = {}
-    results = []
+    results: list[dict[str, Any]] = []
     for candidate in findings:
         rule_id = f"barq/{candidate.engine}/{candidate.kind}"
         rules.setdefault(
@@ -28,7 +28,7 @@ def sarif_report(candidates: Iterable[Candidate]) -> dict:
                 "properties": {"precision": "medium", "security-severity": f"{candidate.score:.1f}"},
             },
         )
-        result = {
+        result: dict[str, Any] = {
             "ruleId": rule_id,
             "level": _LEVEL.get(candidate.severity.lower(), "warning"),
             "message": {"text": f"{candidate.title}. {candidate.safe_next_step}"},
@@ -55,7 +55,7 @@ def sarif_report(candidates: Iterable[Candidate]) -> dict:
             "tool": {
                 "driver": {
                     "name": "BARQ-CRS",
-                    "version": "0.3.0",
+                    "version": "0.4.0",
                     "informationUri": "https://github.com/MEZ111/barq-crs",
                     "rules": list(rules.values()),
                 }

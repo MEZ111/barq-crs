@@ -1,4 +1,4 @@
-"""BARQ-CRS: evidence-gated cyber reasoning for authorized research."""
+"""BARQ-CRS: evidence-gated cyber verification for authorized research."""
 
 from .api_graph import OpenApiDependencyGraph
 from .authz import AuthorizationDifferentialEngine
@@ -11,8 +11,14 @@ from .models import Candidate, Observation
 from .race import StateCollisionEngine
 from .schema_fuzz import OpenApiTestPlanner
 from .variant import PatchSeededVariantEngine
+from .verifier import (
+    ActiveAuthorizationVerifier,
+    OpenApiReadTemplatePlanner,
+    VerificationRunner,
+)
 
 __all__ = [
+    "ActiveAuthorizationVerifier",
     "AndroidArtifactAnalyzer",
     "AuthorizationDifferentialEngine",
     "CampaignRunner",
@@ -21,10 +27,12 @@ __all__ = [
     "EvidenceCollector",
     "Observation",
     "OpenApiDependencyGraph",
+    "OpenApiReadTemplatePlanner",
     "OpenApiTestPlanner",
     "PatchSeededVariantEngine",
     "SignalFusion",
     "StateCollisionEngine",
+    "VerificationRunner",
 ]
 
-__version__ = "0.3.0"
+__version__ = "0.4.0"

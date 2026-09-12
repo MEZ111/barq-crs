@@ -1,0 +1,16 @@
+[
+  {
+    "key": "alice-user",
+    "kind": "user",
+    "value": "alice-controlled-fixture",
+    "owner": "alice",
+    "tenant": "red"
+  },
+  {
+    "key": "bob-user",
+    "kind": "user",
+    "value": "bob-controlled-fixture",
+    "owner": "bob",
+    "tenant": "blue"
+  }
+]

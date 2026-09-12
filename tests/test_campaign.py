@@ -175,4 +175,7 @@ def test_campaign_can_collect_bounded_live_matrix_with_injected_transport(tmp_pa
     )
     result = runner.run(manifest, tmp_path / "out")
     assert result.observation_count == 2
-    assert any(item["title"] == "Non-owner received protected object data" for item in result.top_candidates)
+    assert any(
+        item["kind"] == "cross-principal-object-access"
+        for item in result.top_candidates
+    )

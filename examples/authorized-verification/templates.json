@@ -1,0 +1,17 @@
+[
+  {
+    "name": "read-user",
+    "method": "GET",
+    "url": "https://lab.example.test/api/users/{resource}",
+    "route": "/api/users/{id}",
+    "resource_kind": "user",
+    "tags": ["authorized-example"]
+  },
+  {
+    "name": "read-self",
+    "method": "GET",
+    "url": "https://lab.example.test/api/me",
+    "route": "/api/me",
+    "tags": ["authorized-example"]
+  }
+]

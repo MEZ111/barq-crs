@@ -1,0 +1,14 @@
+{
+  "name": "owned-lab-verification",
+  "active_testing": true,
+  "human_approval_required": true,
+  "targets": [
+    {
+      "pattern": "lab.example.test",
+      "schemes": ["https"],
+      "ports": [443],
+      "methods": ["GET", "HEAD", "OPTIONS"],
+      "max_rps": 0.5
+    }
+  ]
+}
