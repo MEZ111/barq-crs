@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.6.0] — 2026-09-13
+
+### Added
+
+- Smart discovery-to-verification synthesis inside `barq bounty`
+- Automatic conversion of discovered object-reference routes into read-only controlled-resource templates
+- Exact controlled-value matching, explicit query-parameter bindings, and resource-kind path inference
+- Budget-aware template selection that spends the verification request budget on the highest-value routes first
+- Automatic merge of smart verification results back into the main bounty board and delta state
+- `smart-verification-plan.json` with selected routes, dropped-for-budget counts, and estimated request cost
+- Secret-free smart bounty examples using two controlled identities and controlled fixtures
+
+### Hardened
+
+- Discovered third-party identifiers are never replayed by the smart verifier; generated requests substitute explicit researcher-controlled resources before network access
+- Every synthesized route is checked against the active scope policy before it can become a live template
+- Smart mode remains GET-only through the existing verifier and inherits no-redirect, body, timeout, request-count, path-block, and per-target RPS controls
+- Parameter bindings cannot reference resource kinds that are not explicitly configured
+- Existing templates and OpenAPI-generated templates are accounted for before smart routes are admitted to the request budget
+
 ## [0.5.0] — 2026-09-12
 
 ### Added
