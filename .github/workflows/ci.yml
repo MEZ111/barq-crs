@@ -25,7 +25,7 @@ jobs:
       - name: Lint
         run: ruff check src tests scripts
       - name: Type-check critical engines
-        run: mypy src/barq_crs/authz.py src/barq_crs/drift.py src/barq_crs/verifier.py src/barq_crs/bounty.py src/barq_crs/cli.py
+        run: mypy src/barq_crs/authz.py src/barq_crs/drift.py src/barq_crs/verifier.py src/barq_crs/bounty.py src/barq_crs/smart_verify.py src/barq_crs/cli.py
       - name: Tests with branch coverage
         run: coverage run --branch -m pytest
       - name: Coverage gate
@@ -40,12 +40,14 @@ jobs:
           barq api-plan examples/demo/stateful-openapi.json --max-cases 20 >/dev/null
           barq drift examples/demo/openapi-before.json examples/demo/openapi-after.json >/dev/null
           python - <<'PY'
+          from barq_crs import __version__
           from barq_crs.cli import build_parser
           parser = build_parser()
           verify = parser.parse_args(["verify", "manifest.json"])
           bounty = parser.parse_args(["bounty", "campaign.json"])
           assert verify.command == "verify"
           assert bounty.command == "bounty"
+          assert __version__ == "0.6.0"
           PY
       - name: Dependency audit
         if: matrix.python-version == '3.12'
