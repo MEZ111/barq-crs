@@ -88,9 +88,9 @@ def test_bounty_runner_builds_ranked_board_and_delta(tmp_path: Path) -> None:
     def fake_runner(command: list[str], cwd: Path, env: object) -> None:
         out = Path(command[command.index("-o") + 1])
         run = out / "example.com" / "20260912_230000"
-        (run / "crawl").mkdir(parents=True)
-        (run / "scan").mkdir(parents=True)
-        (run / "report").mkdir(parents=True)
+        (run / "crawl").mkdir(parents=True, exist_ok=True)
+        (run / "scan").mkdir(parents=True, exist_ok=True)
+        (run / "report").mkdir(parents=True, exist_ok=True)
         (run / "crawl" / "logic_idor_candidates.txt").write_text(
             "https://api.example.com/accounts/123456?detail=1\n",
             encoding="utf-8",
