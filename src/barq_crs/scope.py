@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from hashlib import sha256
 import ipaddress
 import json
+from pathlib import Path
 import re
 from urllib.parse import unquote, urlsplit, urlunsplit
 
@@ -83,7 +84,7 @@ class ScopePolicy:
         )
 
     @classmethod
-    def load(cls, path: str) -> "ScopePolicy":
+    def load(cls, path: str | Path) -> "ScopePolicy":
         with open(path, encoding="utf-8") as handle:
             return cls.from_dict(json.load(handle))
 
