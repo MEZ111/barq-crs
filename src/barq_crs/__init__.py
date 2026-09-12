@@ -2,6 +2,7 @@
 
 from .api_graph import OpenApiDependencyGraph
 from .authz import AuthorizationDifferentialEngine
+from .bounty import BountyRunner, EndpointPrioritizer
 from .campaign import CampaignRunner
 from .collector import EvidenceCollector
 from .drift import ContractDriftEngine
@@ -21,9 +22,11 @@ __all__ = [
     "ActiveAuthorizationVerifier",
     "AndroidArtifactAnalyzer",
     "AuthorizationDifferentialEngine",
+    "BountyRunner",
     "CampaignRunner",
     "Candidate",
     "ContractDriftEngine",
+    "EndpointPrioritizer",
     "EvidenceCollector",
     "Observation",
     "OpenApiDependencyGraph",
@@ -35,4 +38,4 @@ __all__ = [
     "VerificationRunner",
 ]
 
-__version__ = "0.4.0"
+__version__ = "0.5.0"
