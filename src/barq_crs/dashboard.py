@@ -92,7 +92,7 @@ def html_dashboard(
         "discovery": discovery or {},
     }
     campaign_text = escape(str(campaign), quote=True)
-    return f"""<!doctype html>
+    return rf"""<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
